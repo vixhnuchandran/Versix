@@ -1,10 +1,11 @@
 import { configDotenv } from "dotenv"
 import { Sequelize } from "sequelize"
 configDotenv()
+import pg from "pg"
 
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   logging: false,
-
+  dialectModule: pg,
   pool: {
     max: 10,
     min: 0,

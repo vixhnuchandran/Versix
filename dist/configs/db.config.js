@@ -8,13 +8,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.checkConnection = void 0;
 const dotenv_1 = require("dotenv");
 const sequelize_1 = require("sequelize");
 (0, dotenv_1.configDotenv)();
+const pg_1 = __importDefault(require("pg"));
 const sequelize = new sequelize_1.Sequelize(process.env.DATABASE_URL, {
     logging: false,
+    dialectModule: pg_1.default,
     pool: {
         max: 10,
         min: 0,
