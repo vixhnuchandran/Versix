@@ -3,8 +3,8 @@ import { Store } from "../models"
 import { StatusCodes as HTTP_CODE } from "http-status-codes"
 const router = express.Router()
 
-// Add Task
-router.post("/add-data", async (req: Request, res: Response) => {
+// Set Data
+router.post("/set-data", async (req: Request, res: Response) => {
   const { id, name, data } = req.body
   if (id && data) {
     try {
@@ -37,7 +37,7 @@ router.post("/add-data", async (req: Request, res: Response) => {
   }
 })
 
-// Get Task
+// Get Data
 router.post("/get-data", async (req: Request, res: Response) => {
   const { id, name, version } = req.body
 

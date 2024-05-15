@@ -16,8 +16,8 @@ const express_1 = __importDefault(require("express"));
 const models_1 = require("../models");
 const http_status_codes_1 = require("http-status-codes");
 const router = express_1.default.Router();
-// Add Task
-router.post("/add-data", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// Set Data
+router.post("/set-data", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id, name, data } = req.body;
     if (id && data) {
         try {
@@ -50,7 +50,7 @@ router.post("/add-data", (req, res) => __awaiter(void 0, void 0, void 0, functio
         res.status(http_status_codes_1.StatusCodes.BAD_REQUEST).json({ message: "Incomplete fields" });
     }
 }));
-// Get Task
+// Get Data
 router.post("/get-data", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id, name, version } = req.body;
     try {
