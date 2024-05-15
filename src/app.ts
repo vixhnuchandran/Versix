@@ -14,6 +14,10 @@ app.use((req: Request, res: Response, next) => {
   next()
 })
 
+app.use("/", async (req, res) => {
+  res.send("SERVER IS UP")
+})
+
 app.use("/api", router)
 
 export default app
