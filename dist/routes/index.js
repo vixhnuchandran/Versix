@@ -35,7 +35,7 @@ router.post("/set-data", (req, res) => __awaiter(void 0, void 0, void 0, functio
                 });
             }
             else {
-                yield models_1.Store.create({ id, name, data: { v1: data } });
+                yield models_1.Store.create({ id, name, data: { ["v1"]: data } });
             }
             res.status(http_status_codes_1.StatusCodes.OK).json({ message: "Data added successfully" });
         }
@@ -71,15 +71,16 @@ router.post("/get-data", (req, res) => __awaiter(void 0, void 0, void 0, functio
         const data = existingRecord.dataValues.data;
         let dataToSend;
         if (version) {
-            dataToSend = data[version];
-            if (!dataToSend) {
+            const lowerCaseVersion = String(version).toLowerCase();
+            if (!data[lowerCaseVersion]) {
                 return res
                     .status(http_status_codes_1.StatusCodes.NOT_FOUND)
                     .json({ message: `Version ${version} not found` });
             }
+            dataToSend = data[lowerCaseVersion];
         }
         else {
-            const latestVersion = Math.max(...Object.keys(data).map(Number));
+            const latestVersion = Object.keys(data).sort().pop();
             dataToSend = data[latestVersion];
         }
         res.status(http_status_codes_1.StatusCodes.OK).json(dataToSend);

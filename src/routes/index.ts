@@ -22,7 +22,7 @@ router.post("/set-data", async (req: Request, res: Response) => {
           data: { ...existingRecord.data, [`v${length + 1}`]: data },
         })
       } else {
-        await Store.create({ id, name, data: { v1: data } })
+        await Store.create({ id, name, data: { ["v1"]: data } })
       }
 
       res.status(HTTP_CODE.OK).json({ message: "Data added successfully" })
@@ -63,14 +63,15 @@ router.post("/get-data", async (req: Request, res: Response) => {
     let dataToSend
 
     if (version) {
-      dataToSend = data[version]
-      if (!dataToSend) {
+      const lowerCaseVersion = String(version).toLowerCase()
+      if (!data[lowerCaseVersion]) {
         return res
           .status(HTTP_CODE.NOT_FOUND)
           .json({ message: `Version ${version} not found` })
       }
+      dataToSend = data[lowerCaseVersion]
     } else {
-      const latestVersion = Math.max(...Object.keys(data).map(Number))
+      const latestVersion = Object.keys(data).sort().pop()
       dataToSend = data[latestVersion]
     }
 
