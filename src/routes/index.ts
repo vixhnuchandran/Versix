@@ -17,12 +17,12 @@ router.post("/set-data", async (req: Request, res: Response) => {
       })
 
       if (existingRecord) {
-        const lastVersion = Object.keys(existingRecord.data).length
+        const length = Object.keys(existingRecord.data).length
         await existingRecord.update({
-          data: { ...existingRecord.data, [lastVersion + 1]: data },
+          data: { ...existingRecord.data, [`v${length + 1}`]: data },
         })
       } else {
-        await Store.create({ id, name, data: { 1: data } })
+        await Store.create({ id, name, data: { v1: data } })
       }
 
       res.status(HTTP_CODE.OK).json({ message: "Data added successfully" })

@@ -29,13 +29,13 @@ router.post("/set-data", (req, res) => __awaiter(void 0, void 0, void 0, functio
                 order: [["createdAt", "DESC"]],
             });
             if (existingRecord) {
-                const lastVersion = Object.keys(existingRecord.data).length;
+                const length = Object.keys(existingRecord.data).length;
                 yield existingRecord.update({
-                    data: Object.assign(Object.assign({}, existingRecord.data), { [lastVersion + 1]: data }),
+                    data: Object.assign(Object.assign({}, existingRecord.data), { [`v${length + 1}`]: data }),
                 });
             }
             else {
-                yield models_1.Store.create({ id, name, data: { 1: data } });
+                yield models_1.Store.create({ id, name, data: { v1: data } });
             }
             res.status(http_status_codes_1.StatusCodes.OK).json({ message: "Data added successfully" });
         }
