@@ -25,15 +25,15 @@ router.post("/add-data", async (req: Request, res: Response) => {
         await Store.create({ id, name, data: { 1: data } })
       }
 
-      res.status(HTTP_CODE.OK).json({ msg: "Data added successfully" })
+      res.status(HTTP_CODE.OK).json({ message: "Data added successfully" })
     } catch (error) {
       console.error("Error adding data:", error)
       res
         .status(HTTP_CODE.INTERNAL_SERVER_ERROR)
-        .json({ msg: "An error occurred while adding data" })
+        .json({ message: "An error occurred while adding data" })
     }
   } else {
-    res.status(HTTP_CODE.BAD_REQUEST).json({ msg: "Incomplete fields" })
+    res.status(HTTP_CODE.BAD_REQUEST).json({ message: "Incomplete fields" })
   }
 })
 
@@ -79,7 +79,7 @@ router.post("/get-data", async (req: Request, res: Response) => {
     console.error("Error retrieving data:", error)
     res
       .status(HTTP_CODE.INTERNAL_SERVER_ERROR)
-      .json({ msg: "An error occurred while retrieving data" })
+      .json({ message: "An error occurred while retrieving data" })
   }
 })
 

@@ -37,17 +37,17 @@ router.post("/add-data", (req, res) => __awaiter(void 0, void 0, void 0, functio
             else {
                 yield models_1.Store.create({ id, name, data: { 1: data } });
             }
-            res.status(http_status_codes_1.StatusCodes.OK).json({ msg: "Data added successfully" });
+            res.status(http_status_codes_1.StatusCodes.OK).json({ message: "Data added successfully" });
         }
         catch (error) {
             console.error("Error adding data:", error);
             res
                 .status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR)
-                .json({ msg: "An error occurred while adding data" });
+                .json({ message: "An error occurred while adding data" });
         }
     }
     else {
-        res.status(http_status_codes_1.StatusCodes.BAD_REQUEST).json({ msg: "Incomplete fields" });
+        res.status(http_status_codes_1.StatusCodes.BAD_REQUEST).json({ message: "Incomplete fields" });
     }
 }));
 // Get Task
@@ -88,7 +88,7 @@ router.post("/get-data", (req, res) => __awaiter(void 0, void 0, void 0, functio
         console.error("Error retrieving data:", error);
         res
             .status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR)
-            .json({ msg: "An error occurred while retrieving data" });
+            .json({ message: "An error occurred while retrieving data" });
     }
 }));
 exports.default = router;
