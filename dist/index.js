@@ -48,16 +48,19 @@ const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
             .sync({ alter: true })
             .then(() => {
             console.log("Pipeline Database synchronized");
-            models_1.Store.sync({ alter: true });
-        })
-            .then(() => {
-            console.log("Store Table synchronized");
-            app_1.default.listen(PORT, () => {
-                console.log(`Server listening on port ${PORT}`);
-            });
         })
             .catch(error => {
             console.error("Database synchronization failed:", error);
+        });
+        models_1.Store.sync({ alter: true })
+            .then(() => {
+            console.log("Store Table synchronized");
+        })
+            .catch(error => {
+            console.error("Table synchronization failed:", error);
+        });
+        app_1.default.listen(PORT, () => {
+            console.log(`Server listening on port ${PORT}`);
         });
     }
     catch (error) {
