@@ -16,16 +16,22 @@ router.post("/set-data", async (req: Request, res: Response) => {
         order: [["createdAt", "DESC"]],
       })
 
+      let dataCreated
+      let version
       if (existingRecord) {
         const length = Object.keys(existingRecord.data).length
-        await existingRecord.update({
-          data: { ...existingRecord.data, [`v${length + 1}`]: data },
+
+        dataCreated = await existingRecord.update({
+          data: { ...existingRecord.data, [`${length + 1}`]: data },
         })
+        version = length + 1
       } else {
-        await Store.create({ id, name, data: { ["v1"]: data } })
+        dataCreated = await Store.create({ id, name, data: { ["1"]: data } })
+        version = 1
       }
 
-      res.status(HTTP_CODE.OK).json({ message: "Data added successfully" })
+      console.log(dataCreated)
+      res.status(HTTP_CODE.OK).json({ version })
     } catch (error) {
       console.error("Error adding data:", error)
       res
