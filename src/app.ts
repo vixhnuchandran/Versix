@@ -2,6 +2,7 @@ import express from "express"
 import { Application, Request, Response, NextFunction } from "express"
 import cors from "cors"
 import router from "./routes"
+import { authMiddleware } from "./middleware"
 
 const app: Application = express()
 
@@ -14,6 +15,6 @@ app.use((req: Request, res: Response, next) => {
   next()
 })
 
-app.use("/api", router)
+app.use("/api", authMiddleware, router)
 
 export default app
