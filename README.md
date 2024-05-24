@@ -11,7 +11,7 @@ Lightweight API for storing, retrieving, and managing data along with automated 
  cd pipeline_store
 ```
 
-2. Install dependencies:
+delete my project 2. Install dependencies:
 
 ```bash
  pnpm install
@@ -21,7 +21,6 @@ Lightweight API for storing, retrieving, and managing data along with automated 
 
 ```bash
  PORT=8484
- DATABASE_URL=<your-database-url>
 ```
 
 4. Build:
@@ -36,39 +35,71 @@ Lightweight API for storing, retrieving, and managing data along with automated 
  pnpm start
 ```
 
+## Auth Header
+
+```
+  X-Api-Key: <apiKey>
+```
+
 ## Endpoints
 
-### Add Data
+### Set Data
 
-- **URL:** `/api/add-data`
+- **URL:** `/api/set-data`
 - **Method:** POST
-- **Description:** Adds phone data to the database.
+- **Description:** Create and store data.
 - **Request Body:**
+
   - `id`: Identifier for the record.
-  - `name`: The name of the data source (e.g., "flipkart", "amazon", "gsmarena").
+  - `name`: The name of the data source.
   - `data`: The data in JSON format.
+
+  ```
+  {
+    "id" : <str: id>,
+    "name" : <str: name>
+    "data" : <obj: data>
+  }
+  ```
+
 - **Response:** Returns the Data added successfully, or an error message if unsuccessful.
 
 ### Get Data
 
 - **URL:** `/api/get-data/`
 - **Method:** POST
-- **Description:** Retrieves phone data from the database.
+- **Description:** Retrieves data.
 - **Request Body:**
+
   - `id`: Identifier for the record.
   - `name`: The name of the data source.
   - `version  (optional)`: The data in JSON format.
+
+  ```
+  {
+    "id" : <str: id>,
+    "name" : <str: name>
+    "version" : <int: version>
+  }
+  ```
+
 - **Response:** Returns the requested data if found, or an error message if not found.
 
-## Database Configuration
+### Has Data
 
-The server is configured to use a PostgreSQL database. Make sure to provide the appropriate database URL in the .env file.
+- **URL:** `/api/has-data/`
+- **Method:** POST
+- **Description:** Check if data exist.
+- **Request Body:**
 
-## Dependencies
+  - `id`: Identifier for the record.
+  - `name`: The name of the data source.
 
-- express: For building the web server.
-- sequelize: For interacting with the PostgreSQL database.
-- dotenv: For loading environment variables from a .env file.
-- cors: For enabling Cross-Origin Resource Sharing (CORS)
-- pg: PostgreSQL client for Node.js.
-- pg-hstore : A module for serializing and deserializing JSON data to hstore format.
+  ```
+  {
+    "id" : <str: id>,
+    "name" : <str: name>
+  }
+  ```
+
+- **Response:** Returns the requested data if found, or an error message if not found.
