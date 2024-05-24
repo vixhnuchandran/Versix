@@ -66,7 +66,7 @@ delete my project 2. Install dependencies:
 
 ### Get Data
 
-- **URL:** `/api/get-data/`
+- **URL:** `/api/get-data`
 - **Method:** POST
 - **Description:** Retrieves data.
 - **Request Body:**
@@ -87,7 +87,7 @@ delete my project 2. Install dependencies:
 
 ### Has Data
 
-- **URL:** `/api/has-data/`
+- **URL:** `/api/has-data`
 - **Method:** POST
 - **Description:** Check if data exist.
 - **Request Body:**
