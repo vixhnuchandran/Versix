@@ -9,14 +9,36 @@ import {
   ValidationResult,
 } from "../validations"
 import * as crypto from "crypto"
+import dotenv from "dotenv"
+import { dbStore } from "../utils/dbStore"
+import { client } from "../configs/sqlite.config"
+import multer from "multer"
 
-const fileStorage = new fileStore()
+dotenv.config()
 
+let storage: fileStore | dbStore
+const storeType = process.env.STORE_TYPE
+
+if (!storeType) {
+  throw new Error("STORE_TYPE is not defined in environment variables")
+}
+
+switch (storeType) {
+  case "file":
+    storage = new fileStore()
+    break
+  case "db":
+    storage = new dbStore(client)
+    break
+  default:
+    throw new Error(`Invalid STORE_TYPE: ${storeType}`)
+}
 // Set Data
 export const setData = async (req: Request, res: Response) => {
-  const { id, name, data }: SetDataRequest = req.body
+  const { dataset, id, name }: SetDataRequest = req.body
+  const data = req.file
 
-  const validationResult = validateSetDataReq({ id, name, data })
+  const validationResult = validateSetDataReq({ dataset, id, name, data })
 
   if (!validationResult.isValid) {
     console.error(validationResult.message)
@@ -28,7 +50,7 @@ export const setData = async (req: Request, res: Response) => {
   const hashedId = crypto.createHash("md5").update(id).digest("hex")
 
   try {
-    const version = await fileStorage.saveData(hashedId, name, data)
+    const version = await storage.saveData(dataset, hashedId, name, data)
     console.log(`Data saved successfully with version ${version}.`)
     return res.status(HTTP_CODE.OK).json({ version })
   } catch (error) {
@@ -41,9 +63,10 @@ export const setData = async (req: Request, res: Response) => {
 
 // Get Data
 export const getData = async (req: Request, res: Response) => {
-  const { id, name, version }: GetDataRequest = req.body
+  const { dataset, id, name, version }: GetDataRequest = req.body
 
   const validationResult: ValidationResult = validateGetDataReq({
+    dataset,
     id,
     name,
     version,
@@ -59,7 +82,7 @@ export const getData = async (req: Request, res: Response) => {
   const hashedId = crypto.createHash("md5").update(id).digest("hex")
 
   try {
-    const data = await fileStorage.getData(hashedId, name, version)
+    const data = await storage.getData(dataset, hashedId, name, version)
     console.log("Data retrieved successfully.")
     return res.status(HTTP_CODE.OK).json(data)
   } catch (error) {
@@ -70,9 +93,13 @@ export const getData = async (req: Request, res: Response) => {
 
 // Has Data
 export const hasData = async (req: Request, res: Response) => {
-  const { id, name } = req.body
+  const { dataset, id, name } = req.body
 
-  const validationResult: ValidationResult = validateGetDataReq({ id, name })
+  const validationResult: ValidationResult = validateGetDataReq({
+    dataset,
+    id,
+    name,
+  })
 
   if (!validationResult.isValid) {
     console.error(validationResult.message)
@@ -84,7 +111,7 @@ export const hasData = async (req: Request, res: Response) => {
   const hashedId = crypto.createHash("md5").update(id).digest("hex")
 
   try {
-    const hasData = await fileStorage.hasData(hashedId, name)
+    const hasData = await storage.hasData(dataset, hashedId, name)
     console.log("Check for data completed.")
     return res.status(HTTP_CODE.OK).json({ data: hasData })
   } catch (error) {
