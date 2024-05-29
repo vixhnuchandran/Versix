@@ -12,7 +12,6 @@ import * as crypto from "crypto"
 import dotenv from "dotenv"
 import { dbStore } from "../utils/dbStore"
 import { client } from "../configs/sqlite.config"
-import multer from "multer"
 
 dotenv.config()
 
@@ -33,6 +32,7 @@ switch (storeType) {
   default:
     throw new Error(`Invalid STORE_TYPE: ${storeType}`)
 }
+
 // Set Data
 export const setData = async (req: Request, res: Response) => {
   const { dataset, id, name }: SetDataRequest = req.body
