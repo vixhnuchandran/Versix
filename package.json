@@ -16,11 +16,15 @@
   "author": "vixhnuchandran",
   "license": "ISC",
   "dependencies": {
+    "@libsql/client": "^0.6.0",
+    "@types/multer": "^1.4.11",
+    "aws-sdk": "^2.1629.0",
     "cors": "^2.8.5",
     "crypto-js": "^4.2.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "http-status-codes": "^2.3.0",
+    "multer": "1.4.5-lts.1",
     "rimraf": "^5.0.7"
   },
   "devDependencies": {
