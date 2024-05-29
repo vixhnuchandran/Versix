@@ -21,7 +21,7 @@ export class dbStore {
     version: number,
     data: any
   ): Promise<string> {
-    const originalName = data.originalname
+    const originalName = data.originalname || ""
     const currentDate = Date.now()
     const s3Key = `${dataset}/${hashedId}/${name}/${currentDate}-${originalName}`
 

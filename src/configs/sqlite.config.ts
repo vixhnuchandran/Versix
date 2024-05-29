@@ -3,9 +3,13 @@ import dotenv from "dotenv"
 
 dotenv.config()
 
-const databaseUrl = process.env.TURSO_DATABASE_URL
-const authToken = process.env.TURSO_AUTH_TOKEN
+const databaseUrl = process.env.TURSO_DATABASE_URL!
+const authToken = process.env.TURSO_AUTH_TOKEN!
+const localDatabaseUrl = process.env.LOCAL_DATABASE_URL!
 
+if (!localDatabaseUrl) {
+  throw new Error("Environment variable LOCAL_DATABASE_URL is missing.")
+}
 if (!databaseUrl) {
   throw new Error("Environment variable TURSO_DATABASE_URL is missing.")
 }
@@ -14,23 +18,16 @@ if (!authToken) {
   throw new Error("Environment variable TURSO_AUTH_TOKEN is missing.")
 }
 
-let client: Client
-
-if (process.env.NODE_ENV === "dev") {
-  console.log("Using local database")
-  client = createClient({
-    url: "file:/home/azureuser/pipeline_store/db_store/store.db",
-    authToken: "...",
-  })
-} else if (process.env.NODE_ENV === "prod") {
-  client = createClient({
-    url: databaseUrl,
-    authToken: authToken,
-  })
-}
+const client: Client = createClient({
+  url: localDatabaseUrl,
+  syncUrl: databaseUrl,
+  authToken: authToken,
+})
 
 async function isDatabaseConnected(): Promise<boolean> {
   try {
+    await client.sync()
+
     await client.execute("SELECT 1")
     console.log("Connected to the SQLite database.")
 
@@ -39,6 +36,8 @@ async function isDatabaseConnected(): Promise<boolean> {
     if (storeTableExists) {
       console.log('The "store" table already exists.')
     } else {
+      await client.sync()
+
       await client.execute(`
         CREATE TABLE store (
           store_id INTEGER PRIMARY KEY AUTOINCREMENT,
