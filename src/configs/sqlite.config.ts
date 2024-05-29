@@ -19,7 +19,7 @@ let client: Client
 if (process.env.NODE_ENV === "dev") {
   console.log("Using local database")
   client = createClient({
-    url: "file:/home/vixhnuchandran/github.com/vixhnuchandran/pipeline_store/db_store/store.db",
+    url: "file:/home/azureuser/pipeline_store/db_store/store.db",
     authToken: "...",
   })
 } else if (process.env.NODE_ENV === "prod") {
