@@ -1,10 +1,12 @@
 export interface SetDataRequest {
+  dataset: any
   id: any
   name: any
-  data: any
+  data?: any
 }
 
 export interface GetDataRequest {
+  dataset: any
   id: any
   name: any
   version?: any
@@ -16,6 +18,12 @@ export interface ValidationResult {
 }
 
 export const validateSetDataReq = (obj: SetDataRequest): ValidationResult => {
+  if (!obj.dataset || typeof obj.dataset !== "string") {
+    return {
+      isValid: false,
+      message: "Invalid or missing 'dataset'. Must be a non-empty string.",
+    }
+  }
   if (!obj.id || typeof obj.id !== "string") {
     return {
       isValid: false,
@@ -30,17 +38,16 @@ export const validateSetDataReq = (obj: SetDataRequest): ValidationResult => {
     }
   }
 
-  if (!obj.data || typeof obj.data !== "object") {
-    return {
-      isValid: false,
-      message: "Invalid or missing 'data'. Must be a non-null object.",
-    }
-  }
-
   return { isValid: true }
 }
 
 export const validateGetDataReq = (obj: GetDataRequest): ValidationResult => {
+  if (!obj.dataset || typeof obj.dataset !== "string") {
+    return {
+      isValid: false,
+      message: "Invalid or missing 'dataset'. Must be a non-empty string.",
+    }
+  }
   if (!obj.id || typeof obj.id !== "string") {
     return {
       isValid: false,
