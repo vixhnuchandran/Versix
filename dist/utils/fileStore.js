@@ -36,7 +36,7 @@ class fileStore {
                         .filter(Number.isInteger);
                     version = Math.max(...fileNumbers) + 1;
                 }
-                const fileExtension = (0, path_1.extname)(data.originalname);
+                const fileExtension = (0, path_1.extname)(data.originalname) || "json";
                 fileName = `${version}${fileExtension}`;
             }
             catch (error) {

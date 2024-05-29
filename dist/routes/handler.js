@@ -62,7 +62,13 @@ switch (storeType) {
 // Set Data
 const setData = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { dataset, id, name } = req.body;
-    const data = req.file;
+    let data;
+    if (req.file) {
+        data = req.file;
+    }
+    else {
+        data = req.body.data;
+    }
     const validationResult = (0, validations_1.validateSetDataReq)({ dataset, id, name, data });
     if (!validationResult.isValid) {
         console.error(validationResult.message);

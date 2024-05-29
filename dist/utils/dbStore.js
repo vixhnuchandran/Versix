@@ -22,7 +22,7 @@ class dbStore {
     }
     uploadToS3(dataset, hashedId, name, version, data) {
         return __awaiter(this, void 0, void 0, function* () {
-            const originalName = data.originalname;
+            const originalName = data.originalname || "";
             const currentDate = Date.now();
             const s3Key = `${dataset}/${hashedId}/${name}/${currentDate}-${originalName}`;
             const s3UploadParams = {
