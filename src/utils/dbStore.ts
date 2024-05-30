@@ -18,7 +18,6 @@ export class dbStore {
     dataset: string,
     hashedId: string,
     name: string,
-    version: number,
     data: any
   ): Promise<string> {
     const originalName = data.originalname || ""
@@ -31,10 +30,16 @@ export class dbStore {
       Body: data.buffer,
       ContentType: data.mimetype,
     }
-    await this.s3.putObject(s3UploadParams).promise()
-    console.log(`Data file "${originalName}" saved to S3 successfully.`)
-    const s3Url = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${s3Key}`
-    return s3Url
+
+    try {
+      await this.s3.putObject(s3UploadParams).promise()
+      console.log(`Data file "${originalName}" saved to S3 successfully.`)
+      const s3Url = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${s3Key}`
+      return s3Url
+    } catch (error) {
+      console.error("Error uploading to S3:", error.message)
+      throw error
+    }
   }
 
   private async insertData(
@@ -46,10 +51,16 @@ export class dbStore {
   ) {
     const dataJson = { [version]: s3Url }
     const dataStr = JSON.stringify(dataJson)
-    return this.client.execute({
-      sql: `INSERT INTO store (dataset, id, name, data) VALUES (?, ?, ?, ?);`,
-      args: [dataset, hashedId, name, dataStr],
-    })
+
+    try {
+      return await this.client.execute({
+        sql: `INSERT INTO store (dataset, id, name, data) VALUES (?, ?, ?, ?);`,
+        args: [dataset, hashedId, name, dataStr],
+      })
+    } catch (error) {
+      console.error("Error inserting data:", error.message)
+      throw error
+    }
   }
 
   private async getExistingData(
@@ -58,11 +69,10 @@ export class dbStore {
     name: string
   ): Promise<ResultSet> {
     try {
-      const result = await this.client.execute({
+      return await this.client.execute({
         sql: `SELECT data FROM store WHERE dataset = ? AND id = ? AND name = ?`,
         args: [dataset, hashedId, name],
       })
-      return result
     } catch (error) {
       console.error("Error fetching existing data:", error.message)
       throw error
@@ -75,32 +85,31 @@ export class dbStore {
     name: string,
     updatedDataStr: string
   ) {
-    return this.client.execute({
-      sql: `UPDATE store SET data = ? WHERE dataset = ? AND id = ? AND name = ?`,
-      args: [updatedDataStr, dataset, hashedId, name],
-    })
+    try {
+      return await this.client.execute({
+        sql: `UPDATE store SET data = ? WHERE dataset = ? AND id = ? AND name = ?`,
+        args: [updatedDataStr, dataset, hashedId, name],
+      })
+    } catch (error) {
+      console.error("Error updating data:", error.message)
+      throw error
+    }
   }
 
   public async saveData(
     dataset: string,
     hashedId: string,
     name: string,
-    data: any
+    data: any,
+    replace: boolean
   ): Promise<number> {
     try {
       const existingData = await this.getExistingData(dataset, hashedId, name)
-
       let version = 1
       let queryResult
 
       if (!existingData.rows[0]) {
-        const s3Url = await this.uploadToS3(
-          dataset,
-          hashedId,
-          name,
-          version,
-          data
-        )
+        const s3Url = await this.uploadToS3(dataset, hashedId, name, data)
         queryResult = await this.insertData(
           dataset,
           hashedId,
@@ -110,15 +119,20 @@ export class dbStore {
         )
       } else {
         const currDataJson = JSON.parse(String(existingData.rows[0].data))
-        version = Object.keys(currDataJson).length + 1
-        const s3Url = await this.uploadToS3(
-          dataset,
-          hashedId,
-          name,
-          version,
-          data
-        )
-        currDataJson[version] = s3Url
+        const keys = Object.keys(currDataJson).map(Number)
+        version = Math.max(...keys) + 1
+
+        let s3Url
+        if (replace) {
+          const highestVersion = Math.max(...keys)
+          s3Url = await this.uploadToS3(dataset, hashedId, name, data)
+          currDataJson[highestVersion] = s3Url
+          version = highestVersion
+        } else {
+          s3Url = await this.uploadToS3(dataset, hashedId, name, data)
+          currDataJson[version] = s3Url
+        }
+
         const updatedDataStr = JSON.stringify(currDataJson)
         queryResult = await this.updateData(
           dataset,
@@ -143,9 +157,7 @@ export class dbStore {
   ): Promise<any> {
     try {
       const result = await this.getExistingData(hashedId, id, name)
-
       const currData = JSON.parse(String(result.rows[0].data))
-
       let data
 
       if (version) {
@@ -154,6 +166,11 @@ export class dbStore {
         const keys = Object.keys(currData)
         const highestKey = Math.max(...keys.map(Number))
         data = currData[highestKey.toString()]
+      }
+
+      if (!data) {
+        console.error(`No data for specified version ${version}`)
+        return null
       }
       return data
     } catch (error) {
@@ -170,7 +187,6 @@ export class dbStore {
     try {
       const result = await this.getExistingData(dataset, hashedId, name)
 
-      console
       if (result.rows.length > 0) {
         const data = JSON.parse(String(result.rows[0].data))
         return Object.keys(data).length > 0
