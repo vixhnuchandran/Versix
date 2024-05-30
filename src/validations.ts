@@ -2,7 +2,8 @@ export interface SetDataRequest {
   dataset: any
   id: any
   name: any
-  data?: any
+  data: any
+  replace: string
 }
 
 export interface GetDataRequest {
@@ -17,7 +18,7 @@ export interface ValidationResult {
   message?: string
 }
 
-export const validateSetDataReq = (obj: SetDataRequest): ValidationResult => {
+export const validateSetDataReq = (obj: any): ValidationResult => {
   if (!obj.dataset || typeof obj.dataset !== "string") {
     return {
       isValid: false,
@@ -38,6 +39,13 @@ export const validateSetDataReq = (obj: SetDataRequest): ValidationResult => {
     }
   }
 
+  if (typeof obj.isReplace !== "boolean") {
+    return {
+      isValid: false,
+      message:
+        "Invalid or missing 'replace'. Must be either 'true' or 'false'.",
+    }
+  }
   return { isValid: true }
 }
 
