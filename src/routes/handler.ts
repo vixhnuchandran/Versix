@@ -35,15 +35,23 @@ switch (storeType) {
 
 // Set Data
 export const setData = async (req: Request, res: Response) => {
-  const { dataset, id, name }: SetDataRequest = req.body
+  const { dataset, id, name, replace }: SetDataRequest = req.body
   let data: any
+  const isReplace =
+    replace && replace.toString().toLowerCase() === "true" ? true : false
 
   if (req.file) {
     data = req.file
   } else {
     data = req.body.data
   }
-  const validationResult = validateSetDataReq({ dataset, id, name, data })
+  const validationResult = validateSetDataReq({
+    dataset,
+    id,
+    name,
+    data,
+    isReplace,
+  })
 
   if (!validationResult.isValid) {
     console.error(validationResult.message)
@@ -55,7 +63,14 @@ export const setData = async (req: Request, res: Response) => {
   const hashedId = crypto.createHash("md5").update(id).digest("hex")
 
   try {
-    const version = await storage.saveData(dataset, hashedId, name, data)
+    const version = await storage.saveData(
+      dataset,
+      hashedId,
+      name,
+      data,
+      isReplace
+    )
+
     console.log(`Data saved successfully with version ${version}.`)
     return res.status(HTTP_CODE.OK).json({ version })
   } catch (error) {
@@ -87,9 +102,14 @@ export const getData = async (req: Request, res: Response) => {
   const hashedId = crypto.createHash("md5").update(id).digest("hex")
 
   try {
-    const data = await storage.getData(dataset, hashedId, name, version)
+    const s3Url = await storage.getData(dataset, hashedId, name, version)
+    if (!s3Url) {
+      return res
+        .status(HTTP_CODE.NOT_FOUND)
+        .json({ error: `No data available for specified version ${version}` })
+    }
     console.log("Data retrieved successfully.")
-    return res.status(HTTP_CODE.OK).json(data)
+    return res.status(HTTP_CODE.MOVED_TEMPORARILY).redirect(s3Url)
   } catch (error) {
     console.error("Error retrieving data:", error.message)
     return res.status(HTTP_CODE.NOT_FOUND).json({ error: "Not Found" })
