@@ -15,6 +15,6 @@ app.use((req: Request, res: Response, next) => {
   next()
 })
 
-app.use("/api", authMiddleware, router)
+app.use("/api/store", authMiddleware, router)
 
 export default app
