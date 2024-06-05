@@ -1,5 +1,6 @@
 import { Client, ResultSet } from "@libsql/client"
 import { S3 } from "aws-sdk"
+import crypto from "crypto"
 
 export class dbStore {
   client: Client
@@ -18,22 +19,36 @@ export class dbStore {
     dataset: string,
     hashedId: string,
     name: string,
-    data: any
+    data: any,
+    version?: string | number
   ): Promise<string> {
-    const originalName = data.originalname || ""
-    const currentDate = Date.now()
-    const s3Key = `${dataset}/${hashedId}/${name}/${currentDate}-${originalName}`
+    let s3Key: string
+    let body: Buffer
+    let contentType: string
+
+    if (Buffer.isBuffer(data.buffer)) {
+      const originalName = data.originalname ?? version
+      const currentDate = Date.now()
+      s3Key = `${dataset}/${hashedId}/${name}/${originalName}-${currentDate}`
+      body = data.buffer
+      contentType = data.mimetype
+    } else {
+      const currentDate = Date.now()
+      s3Key = `${dataset}/${hashedId}/${name}/${version}-${currentDate}.json`
+      body = Buffer.from(JSON.stringify(data))
+      contentType = "application/json"
+    }
 
     const s3UploadParams = {
       Bucket: process.env.AWS_S3_BUCKET_NAME,
       Key: s3Key,
-      Body: data.buffer,
-      ContentType: data.mimetype,
+      Body: body,
+      ContentType: contentType,
     }
 
     try {
       await this.s3.putObject(s3UploadParams).promise()
-      console.log(`Data file "${originalName}" saved to S3 successfully.`)
+      console.log(`Data file saved to S3 successfully with key "${s3Key}".`)
       const s3Url = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${s3Key}`
       return s3Url
     } catch (error) {
@@ -109,7 +124,14 @@ export class dbStore {
       let queryResult
 
       if (!existingData.rows[0]) {
-        const s3Url = await this.uploadToS3(dataset, hashedId, name, data)
+        const s3Url = await this.uploadToS3(
+          dataset,
+          hashedId,
+          name,
+          data,
+          version
+        )
+
         queryResult = await this.insertData(
           dataset,
           hashedId,
@@ -125,7 +147,13 @@ export class dbStore {
         let s3Url
         if (replace) {
           const highestVersion = Math.max(...keys)
-          s3Url = await this.uploadToS3(dataset, hashedId, name, data)
+          s3Url = await this.uploadToS3(
+            dataset,
+            hashedId,
+            name,
+            data,
+            highestVersion
+          )
           currDataJson[highestVersion] = s3Url
           version = highestVersion
         } else {
@@ -150,13 +178,13 @@ export class dbStore {
   }
 
   public async getData(
+    dataset: string,
     hashedId: string,
-    id: string,
     name: string,
     version?: number
   ): Promise<any> {
     try {
-      const result = await this.getExistingData(hashedId, id, name)
+      const result = await this.getExistingData(dataset, hashedId, name)
       const currData = JSON.parse(String(result.rows[0].data))
       let data
 

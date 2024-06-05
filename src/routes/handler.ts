@@ -35,16 +35,21 @@ switch (storeType) {
 
 // Set Data
 export const setData = async (req: Request, res: Response) => {
-  const { dataset, id, name, replace }: SetDataRequest = req.body
+  const {
+    dataset,
+    id,
+    name,
+    replace,
+  }: { dataset: string; id: string; name: string; replace: boolean } = req.body
   let data: any
-  const isReplace =
-    replace && replace.toString().toLowerCase() === "true" ? true : false
+  const isReplace = replace && replace.toString().toLowerCase() === "true"
 
   if (req.file) {
     data = req.file
   } else {
     data = req.body.data
   }
+
   const validationResult = validateSetDataReq({
     dataset,
     id,
