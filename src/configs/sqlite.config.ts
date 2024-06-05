@@ -18,15 +18,20 @@ if (!authToken) {
   throw new Error("Environment variable TURSO_AUTH_TOKEN is missing.")
 }
 
+// const client: Client = createClient({
+//   url: localDatabaseUrl,
+//   syncUrl: databaseUrl,
+//   authToken: authToken,
+// })
+
 const client: Client = createClient({
-  url: localDatabaseUrl,
-  syncUrl: databaseUrl,
+  url: databaseUrl,
   authToken: authToken,
 })
 
 async function isDatabaseConnected(): Promise<boolean> {
   try {
-    await client.sync()
+    // await client.sync()
 
     await client.execute("SELECT 1")
     console.log("Connected to the SQLite database.")
