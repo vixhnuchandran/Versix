@@ -49,14 +49,19 @@ export const setData = async (req: Request, res: Response) => {
   } else {
     data = req.body.data
   }
+  if (!data) console.log("no data")
+  const isMultipart: string | boolean = req.is("multipart/form-data")
 
-  const validationResult = validateSetDataReq({
-    dataset,
-    id,
-    name,
-    data,
-    isReplace,
-  })
+  const validationResult = validateSetDataReq(
+    {
+      dataset,
+      id,
+      name,
+      data,
+      isReplace,
+    },
+    isMultipart
+  )
 
   if (!validationResult.isValid) {
     console.error(validationResult.message)

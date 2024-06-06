@@ -18,13 +18,36 @@ export interface ValidationResult {
   message?: string
 }
 
-export const validateSetDataReq = (obj: any): ValidationResult => {
+export const validateSetDataReq = (
+  obj: any,
+  isMultipart: string | boolean
+): ValidationResult => {
+  // Check for 'data' based on content type
+  if (isMultipart) {
+    if (!obj.file && (!obj.data || obj.data === "null")) {
+      return {
+        isValid: false,
+        message: "Invalid or missing 'data' in multipart form data.",
+      }
+    }
+  } else {
+    if (!obj.data) {
+      return {
+        isValid: false,
+        message: "Invalid or missing 'data' in JSON body.",
+      }
+    }
+  }
+
+  // Validate 'dataset'
   if (!obj.dataset || typeof obj.dataset !== "string") {
     return {
       isValid: false,
       message: "Invalid or missing 'dataset'. Must be a non-empty string.",
     }
   }
+
+  // Validate 'id'
   if (!obj.id || typeof obj.id !== "string") {
     return {
       isValid: false,
@@ -32,6 +55,7 @@ export const validateSetDataReq = (obj: any): ValidationResult => {
     }
   }
 
+  // Validate 'name'
   if (!obj.name || typeof obj.name !== "string") {
     return {
       isValid: false,
@@ -39,13 +63,21 @@ export const validateSetDataReq = (obj: any): ValidationResult => {
     }
   }
 
-  if (typeof obj.isReplace !== "boolean") {
+  // Validate 'isReplace'
+  const isReplace =
+    obj.isReplace === "true"
+      ? true
+      : obj.isReplace === "false"
+      ? false
+      : obj.isReplace
+  if (typeof isReplace !== "boolean") {
     return {
       isValid: false,
       message:
         "Invalid or missing 'replace'. Must be either 'true' or 'false'.",
     }
   }
+
   return { isValid: true }
 }
 
