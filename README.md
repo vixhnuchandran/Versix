@@ -1,4 +1,4 @@
-# PipelineStore API
+# Versix  API
 
 Lightweight API for storing, retrieving, and managing data along with automated versioning.
 
@@ -7,8 +7,8 @@ Lightweight API for storing, retrieving, and managing data along with automated 
 1. Clone the repository:
 
 ```bash
- git clone https://github.com/vixhnuchandran/pipeline_store
- cd pipeline_store
+ git clone https://github.com/vixhnuchandran/Versix 
+ cd Versix 
 ```
 
 delete my project 2. Install dependencies:
